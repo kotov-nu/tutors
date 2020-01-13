@@ -57,7 +57,7 @@ def selection_teachers_by_goal(goal, teachers_list):
     return suitable_teachers
 
 
-def save_pick_info(id, name, phone):
+def save_booking_info(id, name, phone):
 
     with open('booking.json', 'r') as f:
 
@@ -69,6 +69,21 @@ def save_pick_info(id, name, phone):
             all_info.update({id: {'name': name, 'phone': phone}})
 
     with open('booking.json', 'w') as f:
+        f.write(dumps(all_info))
+
+
+def save_pick_info(name, phone, goal, time):
+
+    with open('request.json', 'r') as f:
+
+        all_info = f.read()
+        if all_info:
+            loads(all_info).update({'name': name, 'phone': phone, 'goal': goal, 'time': time})
+        else:
+            all_info = {}
+            all_info.update({'name': name, 'phone': phone, 'goal': goal, 'time': time})
+
+    with open('request.json', 'w') as f:
         f.write(dumps(all_info))
 
 
@@ -98,19 +113,27 @@ def sent(id):
 
     name = request.form.get('name')
     phone = request.form.get('phone')
-    save_pick_info(id, name, phone)
+    save_booking_info(id, name, phone)
 
     return render_template('sent.html', teacher=teachers_list[id], name=name, phone=phone)
 
 
-# @app.route('/sent/<int:id>', methods=['GET', 'POST'])
-# def sent(id):
-#
-#     name = request.form.get('name')
-#     phone = request.form.get('phone')
-#
-#     return render_template('sent.html', teacher=teachers_list[id], name=name, phone=phone)
+@app.route('/pick/')
+def pick():
+    return render_template('pick.html')
 
 
+@app.route('/sent_pick/', methods=['POST'])
+def sent_pick():
 
-app.run('0.0.0.0', 8000)
+    name = request.form.get('name')
+    phone = request.form.get('phone')
+    goal = request.form.get('goal')
+    time = request.form.get('time')
+    save_pick_info(name, phone, goal, time)
+
+    return render_template('sent_pick.html', name=name, phone=phone)
+
+
+if __name__ == '__main__':
+    app.run()
